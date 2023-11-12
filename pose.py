@@ -243,7 +243,10 @@ def show_box(box, ax):
 
 def body_detect(**args):
     
-    input_point = np.array([[750, 800], [750, 1000], [750, 1300]])
+    cols = args["image"].shape[0]
+    rows = args["image"].shape[1]
+
+    input_point = np.array([[rows / 2, cols * 0.4], [rows / 2, cols / 2], [rows / 2, cols * 0.65]])
     input_label = np.array([1, 1, 1])
 
     mask_input = args["logits"][np.argmax(args["scores"]), :, :]  # Choose the model's best mask
@@ -264,11 +267,8 @@ def body_detect(**args):
     plt.axis('off')
     plt.show()
 
-    rows = args["image"].shape[0]
-    cols = args["image"].shape[1]
-
-    for x in range(0, rows - 1):
-        for y in range(0, cols -1):
+    for x in range(0, cols - 1):
+        for y in range(0, rows - 1):
             if args["mask"][x, y] == False:
                 args["image"][x, y] = (127, 255, 0)
 
@@ -301,12 +301,12 @@ def detect(input_point, input_label, **args):
     plt.axis('off')
     plt.show()
 
-    rows = image.shape[0]
-    cols = image.shape[1]
+    cols = image.shape[0]
+    rows = image.shape[1]
     mask = masks[0]
 
-    for x in range(0, rows - 1):
-        for y in range(0, cols -1):
+    for x in range(0, cols - 1):
+        for y in range(0, rows - 1):
             if mask[x, y] == False:
                 image[x, y] = (127, 255, 0)
 
@@ -340,7 +340,10 @@ def model_SAM():
         plt.show()
 
         predictor.set_image(image)
-        input_point = np.array([[750, 1000]])
+
+        height = image.shape[0]
+        width = image.shape[1]
+        input_point = np.array([[width / 2, height / 2]])
         input_label = np.array([1])
 
         plt.figure(figsize=(10,10))
@@ -389,12 +392,17 @@ def model_SAM():
 
         """SHIRT DETECT"""
 
-        input_point = np.array([[750, 800], [750, 1000], [700, 1500], [700, 1300]])
+        height = image.shape[0]
+        width = image.shape[1]
+        input_point = np.array([[width / 2, height * 0.4], [width / 2, height / 2], [width * 0.45 , height * 0.75], [width * 0.45, height * 0.65]])
         input_label = np.array([1, 1, 0, 0])
         detect(input_point, input_label, **dic)
 
         """JEANS DETECT"""
-        input_point = np.array([[850, 1300], [850, 1400], [675, 1300], [675, 1400], [750, 1000], [750, 800]])
+
+        height = image.shape[0]
+        width = image.shape[1]
+        input_point = np.array([[width * 0.45, height * 0.65], [width * 0.45, height * 0.7], [width * 0.55, height * 0.65], [width * 0.55, height * 0.7], [width / 2, height / 2], [width / 2, height * 0.4]])
         input_label = np.array([1, 1, 1, 1, 0, 0])
         detect(input_point, input_label, **dic)
 

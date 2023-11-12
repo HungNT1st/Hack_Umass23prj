@@ -233,22 +233,9 @@ def init_feature(name):
     return detector, matcher
 
 
-mp_drawing = mp.solutions.drawing_utils
-mp_drawing_styles = mp.solutions.drawing_styles
-mp_hands = mp.solutions.hands
-
 def getColor(zDist):
     c = int(interp(zDist, [0,15], [0,255]))
     return (c,c,c)
-
-def createLandMarks(hand_landmarks):
-  hand_landmark_style = {}  
-  for k, v in drawing_styles._HAND_LANDMARK_STYLE.items():
-    for landmark in k:
-      c = getColor(abs(hand_landmarks.landmark[landmark].z*100))
-      r = int(abs(hand_landmarks.landmark[landmark].z*100))
-      hand_landmark_style[landmark] =   mp_drawing.DrawingSpec(color=c, thickness=drawing_styles._THICKNESS_DOT, circle_radius= r )
-  return hand_landmark_style       
 
 def projection_matrix(camera_parameters, homography):
     """
@@ -278,26 +265,39 @@ def projection_matrix(camera_parameters, homography):
     projection = np.stack((rot_1, rot_2, rot_3, translation)).T
     return np.dot(camera_parameters, projection)
 
-cap = cv2.VideoCapture(0)
-# Load 3D model from OBJ file 
-camera_parameters = np.array([[1.01937196e+03, 0.00000000e+00, 6.18709801e+02],
- [0.00000000e+00, 1.02421390e+03, 3.27280523e+02], [0, 0, 1]] )
-
-homography =  np.float32([[0.4160569997384721, -1.306889006892538, 553.7055461075881],
-                          [0.7917584252773352, -0.06341244158456338, -108.2770029401219],
-                          [0.0005926357240956578, -0.001020651672127799, 1]])
-projection = projection_matrix(camera_parameters, homography)
-createControls = 1
-counter = 0
-
 def on_change(value):
     valuelf = value/360
     print(valuelf)
     homography[1][1] = valuelf    
 
-choice = 1
 
-def run(export_path):
+def run(export_path, choice = 1):
+    
+    
+    mp_drawing = mp.solutions.drawing_utils
+    mp_drawing_styles = mp.solutions.drawing_styles
+    mp_hands = mp.solutions.hands
+
+    cap = cv2.VideoCapture(0)
+    # Load 3D model from OBJ file 
+    camera_parameters = np.array([[1.01937196e+03, 0.00000000e+00, 6.18709801e+02],
+    [0.00000000e+00, 1.02421390e+03, 3.27280523e+02], [0, 0, 1]] )
+
+    homography =  np.float32([[0.4160569997384721, -1.306889006892538, 553.7055461075881],
+                            [0.7917584252773352, -0.06341244158456338, -108.2770029401219],
+                            [0.0005926357240956578, -0.001020651672127799, 1]])
+    projection = projection_matrix(camera_parameters, homography)
+    createControls = 1
+    counter = 0
+    def createLandMarks(hand_landmarks):
+        hand_landmark_style = {}  
+        for k, v in drawing_styles._HAND_LANDMARK_STYLE.items():
+            for landmark in k:
+                c = getColor(abs(hand_landmarks.landmark[landmark].z*100))
+                r = int(abs(hand_landmarks.landmark[landmark].z*100))
+                hand_landmark_style[landmark] =   mp_drawing.DrawingSpec(color=c, thickness=drawing_styles._THICKNESS_DOT, circle_radius= r )
+        return hand_landmark_style       
+
     obj1 = OBJ(export_path, swapyz=True)  
     obj2 = OBJ(export_path, swapyz=True) 
     if (choice == 1):    
@@ -380,7 +380,9 @@ def run(export_path):
 
             if cv2.waitKey(10) & 0xFF == ord('q'):
                 break
+    cap.release()
+    cv2.destroyAllWindows()
 
 
-cap.release()
-cv2.destroyAllWindows()
+run("./models/export.obj", 1)
+
