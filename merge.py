@@ -280,7 +280,7 @@ def projection_matrix(camera_parameters, homography):
 cap = cv2.VideoCapture(0)
 # Load 3D model from OBJ file
 obj1 = OBJ(os.path.join(dir_name, 'models/export.obj'), swapyz=True)  
-obj2 = OBJ(os.path.join(dir_name, 'models/low-poly-fox-by-pixelmannen.obj'), swapyz=True)  
+obj2 = OBJ(os.path.join(dir_name, 'models/export.obj'), swapyz=True)  
 camera_parameters = np.array([[1.01937196e+03, 0.00000000e+00, 6.18709801e+02],
  [0.00000000e+00, 1.02421390e+03, 3.27280523e+02], [0, 0, 1]] )
 
