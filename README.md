@@ -1,4 +1,4 @@
-# README.md for HackUMass, Members: Hung Nguyen, Minh Vu, Dang Nguyen, Duc Vu, Bao Dang.
+# Scult3D - HackUMass 2023
 # This is a 3d scanning project.
 # HackUMass 3D Scanning Project
 
