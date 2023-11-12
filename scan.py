@@ -262,7 +262,6 @@ def adjust_rig(scale_data, angle_data, model_name):
         # Adjust elbow angles
         for bone_name in ["lowerarm.L", "lowerarm.R"]:
             angle = angle_data[angle_key[bone_name]] - BASE_ELBOW_ANGLE
-            print(angle)
             armature.data.bones[bone_name].select = True
             bpy.ops.transform.rotate(value=angle * 10, orient_axis='Y')
             armature.data.bones[bone_name].select = False
@@ -270,39 +269,16 @@ def adjust_rig(scale_data, angle_data, model_name):
         print(f"The object {model_name} is not  an armature.")
 
 model_path = './3d/character.blend'
-texture_path = './textures/tmv.png'
+model_path = './3d/character.blend'
+def convert2dto3d(texture_path, scale_data, angle_data, export_path):
+    load_blend(model_path)
 
-mock_data_scale = {
-    'left_shoulder-left_elbow': 103.21103,
-    'left_elbow-left_wrist': 82.43298,
-    'right_shoulder-right_elbow': 103.68974,
-    'right_elbow-right_wrist': 93.97019,
-    'left_shoulder-right_shoulder': 141.53111,
-    'left_shoulder-left_hip': 211.29852,
-    'right_shoulder-right_hip': 219.04877,
-    'left_hip-right_hip': 81.73816,
-    'left_hip-left_knee': 158.65524,
-    'right_hip-right_knee': 158.48114,
-    'left_knee-left_ankle': 80.622116,
-    'right_knee-right_ankle': 79.58818
-}
-mock_data_angle = {
-    'left_shoulder': 2.461024985435223,
-    'right_shoulder': 2.3077259178098255,
-    'left_elbow': 2.9540990558848352,
-    'right_elbow': 3.0646080553608006,
-    'left_hip': 1.6520571392932055,
-    'right_hip': 1.5707963058771386
-}
+    amature_name = select_armature_object()
+    model_name = select_mesh_object()
 
-load_blend(model_path)
+    adjust_rig(scale_data, angle_data, amature_name)
 
-amature_name = select_armature_object()
-model_name = select_mesh_object()
+    create_uv_map(model_name)
+    apply_texture(model_name, texture_path)
 
-adjust_rig(mock_data_scale, mock_data_angle, amature_name)
-
-create_uv_map(model_name)
-apply_texture(model_name, texture_path)
-
-export_model('export.obj')
+    export_model(export_path)
