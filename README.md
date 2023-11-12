@@ -1,4 +1,4 @@
-# Scult3D - HackUMass 2023
+# Sculpt3D - HackUMass 2023
 
 This project is being developed by the following team members:
 
