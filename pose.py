@@ -12,9 +12,6 @@ from tkinter.simpledialog import askstring
 from tkinter.filedialog import askopenfilename
 from mediapipe.framework.formats import landmark_pb2
 from segment_anything import sam_model_registry, SamPredictor
-mp_pose = mp.solutions.pose
-mp_holistic = mp.solutions.holistic
-mp_drawing = mp.solutions.drawing_utils
 
 body_coord = [
   "NOSE",
@@ -41,12 +38,17 @@ body_coord = [
 res = []
 # p = "./"
 
-def get_body_coord(str, image_width, image_height, results):
-  return np.array([results.pose_landmarks.landmark[mp_holistic.PoseLandmark[str]].x * image_width,
-          results.pose_landmarks.landmark[mp_holistic.PoseLandmark[str]].y * image_height])
 
 def input_from_bro(p):
-  print("inputting")
+
+  mp_pose = mp.solutions.pose
+  mp_holistic = mp.solutions.holistic
+  mp_drawing = mp.solutions.drawing_utils
+
+  def get_body_coord(str, image_width, image_height, results):
+    return np.array([results.pose_landmarks.landmark[mp_holistic.PoseLandmark[str]].x * image_width,
+            results.pose_landmarks.landmark[mp_holistic.PoseLandmark[str]].y * image_height])
+
   with mp_pose.Pose(
     static_image_mode=True, min_detection_confidence=0.5) as pose:
     print(p)
@@ -215,11 +217,6 @@ if (torch.cuda.is_available()):
 else:
     device = "cpu"
 
-sam = sam_model_registry[model_type](checkpoint=sam_checkpoint)
-sam.to(device=device)
-
-predictor = SamPredictor(sam)
-
 def show_mask(mask, ax, random_color=False):
     if random_color:
         color = np.concatenate([np.random.random(3), np.array([0.6])], axis=0)
@@ -241,87 +238,99 @@ def show_box(box, ax):
     ax.add_patch(plt.Rectangle((x0, y0), w, h, edgecolor='green', facecolor=(0,0,0,0), lw=2))
 
 
-def body_detect(**args):
-    
-    cols = args["image"].shape[0]
-    rows = args["image"].shape[1]
-
-    input_point = np.array([[rows / 2, cols * 0.4], [rows / 2, cols / 2], [rows / 2, cols * 0.65]])
-    input_label = np.array([1, 1, 1])
-
-    mask_input = args["logits"][np.argmax(args["scores"]), :, :]  # Choose the model's best mask
-
-    masks, _, _ = predictor.predict(
-        point_coords=input_point,
-        point_labels=input_label,
-        mask_input=mask_input[None, :, :],
-        multimask_output=False,
-    )
-
-    masks.shape
-
-    plt.figure(figsize=(10,10))
-    plt.imshow(args["image"])
-    show_mask(masks, plt.gca())
-    show_points(input_point, input_label, plt.gca())
-    plt.axis('off')
-    plt.show()
-
-    for x in range(0, cols - 1):
-        for y in range(0, rows - 1):
-            if args["mask"][x, y] == False:
-                args["image"][x, y] = (127, 255, 0)
-
-    plt.imshow(args["image"])
-    plt.axis('off')
-    fname = f'./clothes/{args["name"]}_{"front" if args["j"] == 0 else "back"}_body.jpg'
-    print(fname)
-    plt.savefig(fname)
-    
-def detect(input_point, input_label, **args):
-    print("detecting...")
-    image = cv2.imread(args["uploaded"])
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-
-    mask_input = args["logits"][np.argmax(args["scores"]), :, :]  # Choose the model's best mask
-
-    masks, _, _ = predictor.predict(
-        point_coords=input_point,
-        point_labels=input_label,
-        mask_input=mask_input[None, :, :],
-        multimask_output=False,
-    )
-
-    masks.shape
-
-    plt.figure(figsize=(10,10))
-    plt.imshow(image)
-    show_mask(masks, plt.gca())
-    show_points(input_point, input_label, plt.gca())
-    plt.axis('off')
-    plt.show()
-
-    cols = image.shape[0]
-    rows = image.shape[1]
-    mask = masks[0]
-
-    for x in range(0, cols - 1):
-        for y in range(0, rows - 1):
-            if mask[x, y] == False:
-                image[x, y] = (127, 255, 0)
-
-    plt.imshow(image)
-    plt.axis('off')
-    fname = f'./clothes/{args["name"]}_{"front" if args["j"] == 0 else "back"}_{"shirt" if len(input_point) == 4 else "jeans"}.jpg'
-    print(fname)
-    plt.savefig(fname)
-    
+   
 # MODEL
 def model_SAM():
-    print("model_sam")
     global p
     root = tk.Tk()
     root.withdraw()  # Hide the main window
+    
+    sam = sam_model_registry[model_type](checkpoint=sam_checkpoint)
+    sam.to(device=device)
+
+    predictor = SamPredictor(sam)
+
+
+
+    def body_detect(**args):
+        
+        cols = args["image"].shape[0]
+        rows = args["image"].shape[1]
+
+        input_point = np.array([[rows / 2, cols * 0.4], [rows / 2, cols / 2], [rows / 2, cols * 0.65]])
+        input_label = np.array([1, 1, 1])
+
+        mask_input = args["logits"][np.argmax(args["scores"]), :, :]  # Choose the model's best mask
+
+        masks, _, _ = predictor.predict(
+            point_coords=input_point,
+            point_labels=input_label,
+            mask_input=mask_input[None, :, :],
+            multimask_output=False,
+        )
+
+        masks.shape
+
+        plt.figure(figsize=(10,10))
+        plt.imshow(args["image"])
+        show_mask(masks, plt.gca())
+        show_points(input_point, input_label, plt.gca())
+        plt.axis('off')
+        plt.show()
+
+        for x in range(0, cols - 1):
+            for y in range(0, rows - 1):
+                if args["mask"][x, y] == False:
+                    args["image"][x, y] = (127, 255, 0)
+
+        plt.imshow(args["image"])
+        plt.axis('off')
+        fname = f'./clothes/{args["name"]}_{"front" if args["j"] == 0 else "back"}_body.jpg'
+        print(fname)
+        plt.savefig(fname)
+    
+def detect(input_point, input_label, **args):
+    image = cv2.imread(args["uploaded"])
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        mask_input = args["logits"][np.argmax(args["scores"]), :, :]  # Choose the model's best mask
+
+        masks, _, _ = predictor.predict(
+            point_coords=input_point,
+            point_labels=input_label,
+            mask_input=mask_input[None, :, :],
+            multimask_output=False,
+        )
+
+        masks.shape
+
+        plt.figure(figsize=(10,10))
+        plt.imshow(image)
+        show_mask(masks, plt.gca())
+        show_points(input_point, input_label, plt.gca())
+        plt.axis('off')
+        plt.show()
+
+        cols = image.shape[0]
+        rows = image.shape[1]
+        mask = masks[0]
+
+        for x in range(0, cols - 1):
+            for y in range(0, rows - 1):
+                if mask[x, y] == False:
+                    image[x, y] = (127, 255, 0)
+
+        plt.imshow(image)
+        plt.axis('off')
+        fname = f'./clothes/{args["name"]}_{"front" if args["j"] == 0 else "back"}_{"shirt" if len(input_point) == 4 else "jeans"}.jpg'
+        print(fname)
+        plt.savefig(fname)
+    
+
+
+
+
+
 
     # Use a simple dialog to get input instead of input()
     name = askstring("Input", "Please enter something:")
@@ -362,7 +371,6 @@ def model_SAM():
         masks.shape  # (number_of_masks) x H x W
 
         
-
         for i, (mask, score) in enumerate(zip(masks, scores)):
             plt.figure(figsize=(10,10))
             plt.imshow(image)
