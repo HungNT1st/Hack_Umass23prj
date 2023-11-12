@@ -87,7 +87,7 @@ def create_uv_map(model_name):
     # obj = bpy.data.objects[model_name]
     # bpy.context.view_layer.objects.active = obj
 
-    # # Check if the object is a mesh and switch to Edit Mode
+    # Project view? - Failed
     # if obj.type == 'MESH':
     #     bpy.ops.object.mode_set(mode='EDIT')
 
@@ -223,11 +223,18 @@ def adjust_rig(scale_data, angle_data, model_name):
             bpy.ops.transform.resize(value=(scale, scale, scale))
             armature.data.bones[bone_name].select = False
         
-        # Adjust height
+        # Adjust upper body height
         scale_height = calculate_scale(scale_data, type="upper")
         armature.data.bones['chest'].select = True
         bpy.ops.transform.resize(value=(scale_height, scale_height, scale_height))
         armature.data.bones['chest'].select = False
+
+        # Translate waist position from legs' length differences (Max for people with disabilities)
+        upperleg_length_diff = max(scale_data["left_hip-left_knee"], scale_data["right_hip-right_knee"]) - BASE_UPPER_LEG_LENGTH
+        lowerleg_length_diff = max(scale_data["left_knee-left_ankle"], scale_data["right_knee-right_ankle"]) - BASE_LOWER_LEG_LENGTH
+        armature.data.bones['wiest'].select = True
+        bpy.ops.transform.translate(value=(0, 0, (upperleg_length_diff + lowerleg_length_diff) / 40))
+        armature.data.bones['wiest'].select = False
 
         angle_key = {
             "upperarm.L": "left_shoulder",
@@ -252,14 +259,15 @@ def adjust_rig(scale_data, angle_data, model_name):
         #     bpy.ops.transform.rotate(value=angle, orient_axis='Z')
         #     armature.data.bones[bone_name].select = False
 
-        # Adjust armature angles
+        # Adjust elbow angles
         for bone_name in ["lowerarm.L", "lowerarm.R"]:
             angle = angle_data[angle_key[bone_name]] - BASE_ELBOW_ANGLE
+            print(angle)
             armature.data.bones[bone_name].select = True
-            bpy.ops.transform.rotate(value=angle, orient_axis='Y')
+            bpy.ops.transform.rotate(value=angle * 10, orient_axis='Y')
             armature.data.bones[bone_name].select = False
     else:
-        print(f"The object {model_name} is not an armature.")
+        print(f"The object {model_name} is not  an armature.")
 
 model_path = './3d/character.blend'
 texture_path = './textures/tmv.png'
