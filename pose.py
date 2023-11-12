@@ -402,6 +402,8 @@ res = model(res)
 
 # Sample for retrieving elements:
 res["height"]()
+print(res["lengths"]())
+print(res["angles"]())
 
 
 

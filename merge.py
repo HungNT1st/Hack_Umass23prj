@@ -278,9 +278,7 @@ def projection_matrix(camera_parameters, homography):
     return np.dot(camera_parameters, projection)
 
 cap = cv2.VideoCapture(0)
-# Load 3D model from OBJ file
-obj1 = OBJ(os.path.join(dir_name, 'models/export.obj'), swapyz=True)  
-obj2 = OBJ(os.path.join(dir_name, 'models/export.obj'), swapyz=True)  
+# Load 3D model from OBJ file 
 camera_parameters = np.array([[1.01937196e+03, 0.00000000e+00, 6.18709801e+02],
  [0.00000000e+00, 1.02421390e+03, 3.27280523e+02], [0, 0, 1]] )
 
@@ -298,86 +296,89 @@ def on_change(value):
 
 choice = 1
 
-if (choice == 1):    
-    with mp_hands.Hands(static_image_mode=False,min_detection_confidence=0.8, min_tracking_confidence=0.5) as hands: 
+def run(export_path):
+    obj1 = OBJ(export_path, swapyz=True)  
+    obj2 = OBJ(export_path, swapyz=True) 
+    if (choice == 1):    
+        with mp_hands.Hands(static_image_mode=False,min_detection_confidence=0.8, min_tracking_confidence=0.5) as hands: 
+            while cap.isOpened():
+                ret, frame = cap.read()
+                image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                image = cv2.flip(image, 1)
+                image.flags.writeable = False
+                results = hands.process(image)
+                image.flags.writeable = True
+                image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+                image_height, image_width, _ = image.shape
+                
+                # Rendering results
+                if results.multi_hand_landmarks:
+                    for num, hand_landmarks  in enumerate(results.multi_hand_landmarks):
+                        mp_drawing.draw_landmarks(image, hand_landmarks, mp_hands.HAND_CONNECTIONS, 
+                                            createLandMarks(hand_landmarks),
+                                            mp_drawing_styles.get_default_hand_connections_style())                        
+                                        
+                        lnd1 = hand_landmarks.landmark[4]
+                        lnd2 = hand_landmarks.landmark[0]
+                        lnd3 = hand_landmarks.landmark[17]
+                        lnd4 = hand_landmarks.landmark[8]
+                        lndLst = np.array([[lnd1.x*image_width, lnd1.y* image_height],
+                                        [lnd2.x*image_width, lnd2.y* image_height],
+                                        [lnd3.x*image_width, lnd3.y* image_height], 
+                                        [lnd4.x*image_width, lnd4.y* image_height],
+                                        [lnd1.x*image_width, lnd1.y* image_height]]).reshape((-1, 1, 2))
+                        
+                        image = cv2.polylines(image, [np.int32(lndLst)], True, 255, 3, cv2.LINE_AA)
+                        
+                        src_pts = np.float32([0 , 0 ,
+                                            500, 0,
+                                            500, 500,
+                                            0, 500]).reshape(-1, 1, 2)
+                        dst_pts = np.float32([lnd1.x*image_width, lnd1.y* image_height,
+                                            lnd2.x*image_width, lnd2.y* image_height,
+                                            lnd3.x*image_width, lnd3.y* image_height,
+                                            lnd4.x*image_width, lnd4.y* image_height]).reshape(-1, 1, 2) 
+                        dst_pts = dst_pts.round(2)
+                        homography, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
+                        projection = projection_matrix(camera_parameters, homography)  
+                        
+                        if(results.multi_handedness[num].classification[0].label == "Left"):
+                            image = renderObj(image, obj1, projection, True)
+                        else:
+                            image = renderObj(image, obj2, projection, True)
+                
+                plot = np.zeros([image_height, image_width, 3], dtype=np.uint8)                
+                if results.multi_hand_world_landmarks:
+                    for num,hand_world_landmarks in enumerate(results.multi_hand_world_landmarks):                
+                        for idx,landMrk in enumerate(hand_world_landmarks.landmark):
+                            hand_world_landmarks.landmark[idx].x += 0.5
+                            hand_world_landmarks.landmark[idx].y += 0.5
+                        mp_drawing.draw_landmarks(plot,hand_world_landmarks, mp_hands.HAND_CONNECTIONS)
+                
+                # cv2.imshow('Plot', plot)
+                cv2.imshow('HandTracking', image) 
+
+                if(createControls):
+                    createControls = 0
+                
+                if cv2.waitKey(10) & 0xFF == ord('q'):
+                    break
+    else:
+        video_height = 600
+        video_width = 800
+        overlay_image = cv2.imread('overlay.jpg')
+        overlay_image = cv2.resize(overlay_image, (video_width, video_height))
+
         while cap.isOpened():
             ret, frame = cap.read()
-            image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            image = cv2.flip(image, 1)
-            image.flags.writeable = False
-            results = hands.process(image)
-            image.flags.writeable = True
-            image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-            image_height, image_width, _ = image.shape
-            
-            # Rendering results
-            if results.multi_hand_landmarks:
-                for num, hand_landmarks  in enumerate(results.multi_hand_landmarks):
-                    mp_drawing.draw_landmarks(image, hand_landmarks, mp_hands.HAND_CONNECTIONS, 
-                                        createLandMarks(hand_landmarks),
-                                        mp_drawing_styles.get_default_hand_connections_style())                        
-                                    
-                    lnd1 = hand_landmarks.landmark[4]
-                    lnd2 = hand_landmarks.landmark[0]
-                    lnd3 = hand_landmarks.landmark[17]
-                    lnd4 = hand_landmarks.landmark[8]
-                    lndLst = np.array([[lnd1.x*image_width, lnd1.y* image_height],
-                                    [lnd2.x*image_width, lnd2.y* image_height],
-                                    [lnd3.x*image_width, lnd3.y* image_height], 
-                                    [lnd4.x*image_width, lnd4.y* image_height],
-                                    [lnd1.x*image_width, lnd1.y* image_height]]).reshape((-1, 1, 2))
-                    
-                    image = cv2.polylines(image, [np.int32(lndLst)], True, 255, 3, cv2.LINE_AA)
-                    
-                    src_pts = np.float32([0 , 0 ,
-                                        500, 0,
-                                        500, 500,
-                                        0, 500]).reshape(-1, 1, 2)
-                    dst_pts = np.float32([lnd1.x*image_width, lnd1.y* image_height,
-                                        lnd2.x*image_width, lnd2.y* image_height,
-                                        lnd3.x*image_width, lnd3.y* image_height,
-                                        lnd4.x*image_width, lnd4.y* image_height]).reshape(-1, 1, 2) 
-                    dst_pts = dst_pts.round(2)
-                    homography, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
-                    projection = projection_matrix(camera_parameters, homography)  
-                    
-                    if(results.multi_handedness[num].classification[0].label == "Left"):
-                        image = renderObj(image, obj1, projection, True)
-                    else:
-                        image = renderObj(image, obj2, projection, True)
-            
-            plot = np.zeros([image_height, image_width, 3], dtype=np.uint8)                
-            if results.multi_hand_world_landmarks:
-                for num,hand_world_landmarks in enumerate(results.multi_hand_world_landmarks):                
-                    for idx,landMrk in enumerate(hand_world_landmarks.landmark):
-                        hand_world_landmarks.landmark[idx].x += 0.5
-                        hand_world_landmarks.landmark[idx].y += 0.5
-                    mp_drawing.draw_landmarks(plot,hand_world_landmarks, mp_hands.HAND_CONNECTIONS)
-            
-            # cv2.imshow('Plot', plot)
-            cv2.imshow('HandTracking', image) 
+            if ret:
+                aruco_markers = findArucoMarkers(frame, totalMarkers=1000)
+                frame = superimposeImageOnMarkers(frame, aruco_markers, obj1, overlay_image,
+                                                    video_width, video_height)
+                cv2.imshow('Video', frame)
 
-            if(createControls):
-                createControls = 0
-            
             if cv2.waitKey(10) & 0xFF == ord('q'):
                 break
-else:
-    video_height = 600
-    video_width = 800
-    overlay_image = cv2.imread('overlay.jpg')
-    overlay_image = cv2.resize(overlay_image, (video_width, video_height))
-
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if ret:
-            aruco_markers = findArucoMarkers(frame, totalMarkers=1000)
-            frame = superimposeImageOnMarkers(frame, aruco_markers, obj1, overlay_image,
-                                                video_width, video_height)
-            cv2.imshow('Video', frame)
-
-        if cv2.waitKey(10) & 0xFF == ord('q'):
-            break
 
 
 cap.release()
