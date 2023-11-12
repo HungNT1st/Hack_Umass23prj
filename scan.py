@@ -2,7 +2,7 @@ import bpy
 import bmesh
 import os
 import math
-
+from pose import *
 # Global default vars
 BASE_ARMPIT_ANGLE = 2.461024985435223
 BASE_ELBOW_ANGLE = 2.9540990558848352
@@ -15,6 +15,7 @@ BASE_UPPER_ARM_LENGTH = 77.71532
 BASE_LOWER_ARM_LENGTH = 67.15182
 
 def load_blend(model_path):
+    print("Loading 3D model...")
     bpy.ops.wm.open_mainfile(filepath=model_path)
 
 def load_obj(model_path):
@@ -74,6 +75,7 @@ def select_mesh_object():
         return None
 
 def create_uv_map(model_name):
+    print("UV mapping")
     obj = bpy.data.objects[model_name]
     bpy.context.view_layer.objects.active = obj
     bpy.ops.object.mode_set(mode='EDIT')
@@ -107,6 +109,7 @@ def create_uv_map(model_name):
     #     print(f"The object {model_name} is not a mesh.")
 
 def apply_texture(model_name, texture_path):
+    print("Applying texture...")
     absolute_texture_path = os.path.abspath(texture_path)
 
     img = bpy.data.images.load(absolute_texture_path)
@@ -191,6 +194,7 @@ def calculate_scale(data, type="upper"):
     return 1
     
 def adjust_rig(scale_data, angle_data, model_name):
+    print("Adjusting pose")
     bpy.context.view_layer.objects.active = bpy.data.objects[model_name]
 
     if bpy.context.active_object.type == 'ARMATURE':
@@ -270,6 +274,7 @@ def adjust_rig(scale_data, angle_data, model_name):
 
 model_path = './3d/character.blend'
 model_path = './3d/character.blend'
+
 def convert2dto3d(texture_path, scale_data, angle_data, export_path):
     load_blend(model_path)
 
@@ -282,3 +287,5 @@ def convert2dto3d(texture_path, scale_data, angle_data, export_path):
     apply_texture(model_name, texture_path)
 
     export_model(export_path)
+
+    return True

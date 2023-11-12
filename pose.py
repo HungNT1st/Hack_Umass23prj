@@ -46,6 +46,7 @@ def get_body_coord(str, image_width, image_height, results):
           results.pose_landmarks.landmark[mp_holistic.PoseLandmark[str]].y * image_height])
 
 def input_from_bro(p):
+  print("inputting")
   with mp_pose.Pose(
     static_image_mode=True, min_detection_confidence=0.5) as pose:
     print(p)
@@ -278,6 +279,7 @@ def body_detect(**args):
     plt.savefig(fname)
     
 def detect(input_point, input_label, **args):
+    print("detecting...")
     image = cv2.imread(args["uploaded"])
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
@@ -316,6 +318,7 @@ def detect(input_point, input_label, **args):
     
 # MODEL
 def model_SAM():
+    print("model_sam")
     global p
     root = tk.Tk()
     root.withdraw()  # Hide the main window
@@ -394,16 +397,18 @@ def model_SAM():
         input_point = np.array([[850, 1300], [850, 1400], [675, 1300], [675, 1400], [750, 1000], [750, 800]])
         input_label = np.array([1, 1, 1, 1, 0, 0])
         detect(input_point, input_label, **dic)
+
+        return True
         
 
-model_SAM()
-input_from_bro(p)        
-res = model(res)
+# model_SAM()
+# input_from_bro(p)        
+# res = model(res)
 
-# Sample for retrieving elements:
-res["height"]()
-print(res["lengths"]())
-print(res["angles"]())
+# # Sample for retrieving elements:
+# res["height"]()
+# print(res["lengths"]())
+# print(res["angles"]())
 
 
 

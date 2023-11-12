@@ -2,8 +2,7 @@ from scan import *
 from pose import *
 from merge import *
 
-model_SAM() 
-input_from_bro(p)     
+model_SAM()     
 res = model(res)
 texture_path = "./"
 scale_data = res["lengths"]()

@@ -255,6 +255,7 @@ def projection_matrix(camera_parameters, homography):
     From the camera calibration matrix and the estimated homography
     compute the 3D projection matrix
     """
+    print("What")
     # Compute rotation along the x and y axis as well as the translation
     homography = homography * (-1)
     rot_and_transl = np.dot(np.linalg.inv(camera_parameters), homography)
