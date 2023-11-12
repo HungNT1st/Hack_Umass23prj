@@ -16,6 +16,6 @@ Our goal is to build a solution that is fast and accessible under the constraint
 
 ## What to expect
 
-Our project requires a pretrained machine learning weights imported from SAM. You can download that weight here [here](https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth)
+Our project requires a pretrained machine learning weights imported from SAM. You can download the pre-trained weights [here](https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth)
 
 Please enjoy your time here!
