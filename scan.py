@@ -2,7 +2,7 @@ import bpy
 import bmesh
 import os
 import math
-from pose import *
+from merge import *
 # Global default vars
 BASE_ARMPIT_ANGLE = 2.461024985435223
 BASE_ELBOW_ANGLE = 2.9540990558848352
@@ -273,7 +273,6 @@ def adjust_rig(scale_data, angle_data, model_name):
         print(f"The object {model_name} is not  an armature.")
 
 model_path = './3d/character.blend'
-model_path = './3d/character.blend'
 
 def convert2dto3d(texture_path, scale_data, angle_data, export_path):
     load_blend(model_path)
@@ -281,7 +280,7 @@ def convert2dto3d(texture_path, scale_data, angle_data, export_path):
     amature_name = select_armature_object()
     model_name = select_mesh_object()
 
-    adjust_rig(scale_data, angle_data, amature_name)
+    # adjust_rig(scale_data, angle_data, amature_name)
 
     create_uv_map(model_name)
     apply_texture(model_name, texture_path)
@@ -289,3 +288,5 @@ def convert2dto3d(texture_path, scale_data, angle_data, export_path):
     export_model(export_path)
 
     return True
+
+convert2dto3d("./textures/bao.jpg", {}, {}, "./models/export.obj")

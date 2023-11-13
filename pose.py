@@ -12,6 +12,8 @@ from tkinter.simpledialog import askstring
 from tkinter.filedialog import askopenfilename
 from mediapipe.framework.formats import landmark_pb2
 from segment_anything import sam_model_registry, SamPredictor
+from scan import *
+from merge import *
 
 body_coord = [
   "NOSE",
@@ -289,9 +291,9 @@ def model_SAM():
         print(fname)
         plt.savefig(fname)
     
-def detect(input_point, input_label, **args):
-    image = cv2.imread(args["uploaded"])
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    def detect(input_point, input_label, **args):
+        image = cv2.imread(args["uploaded"])
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
         mask_input = args["logits"][np.argmax(args["scores"]), :, :]  # Choose the model's best mask
 
@@ -326,15 +328,12 @@ def detect(input_point, input_label, **args):
         print(fname)
         plt.savefig(fname)
     
-
-
-
-
-
-
     # Use a simple dialog to get input instead of input()
-    name = askstring("Input", "Please enter something:")
-
+    name = askstring("Input", "Please enter your name:")
+    if name == None:
+       print("No input was entered")
+       return None
+    
     for j in range(0, 2):
         uploaded = askopenfilename()
         if j == 0:
@@ -413,23 +412,20 @@ def detect(input_point, input_label, **args):
         input_point = np.array([[width * 0.45, height * 0.65], [width * 0.45, height * 0.7], [width * 0.55, height * 0.65], [width * 0.55, height * 0.7], [width / 2, height / 2], [width / 2, height * 0.4]])
         input_label = np.array([1, 1, 1, 1, 0, 0])
         detect(input_point, input_label, **dic)
-
-        return True
+    return name
         
 
 # model_SAM()
 # input_from_bro(p)        
 # res = model(res)
 
-# # Sample for retrieving elements:
+# Sample for retrieving elements:
 # res["height"]()
 # print(res["lengths"]())
 # print(res["angles"]())
-
-
-
-
-
-
-
-
+# scale_data = res["lengths"]()
+# angle_data = res["angles"]()
+# export_path = "./models/export.obj"
+# texture_path = "./textures/bao.jpg"
+# convert2dto3d(texture_path, scale_data, angle_data, export_path)
+# run(export_path, 1)

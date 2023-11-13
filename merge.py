@@ -75,7 +75,7 @@ def augment(img, obj, projection, h, w, scale = 4):
         cv2.fillConvexPoly(img, imgpts, face[-1])
         
     return img
-
+filename = "./models/export.mtl"
 def MTL(filename):
     contents = {}
     mtl = None
@@ -145,7 +145,7 @@ class OBJ:
                         norms.append(0)
                 self.faces.append((face, norms, texcoords))
 
-def render(img, obj, projection, model, color=False):
+def render(img, obj, projection, model, color=True):
     """
     Render a loaded obj model into the current video frame
     """
@@ -168,7 +168,7 @@ def render(img, obj, projection, model, color=False):
 
     return img
 
-def renderObj(img, obj, projection, color=False):
+def renderObj(img, obj, projection, color=True):
     """
     Render a loaded obj model into the current video frame
     """
@@ -278,7 +278,7 @@ def run(export_path, choice = 1):
     mp_drawing_styles = mp.solutions.drawing_styles
     mp_hands = mp.solutions.hands
 
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(1)
     # Load 3D model from OBJ file 
     camera_parameters = np.array([[1.01937196e+03, 0.00000000e+00, 6.18709801e+02],
     [0.00000000e+00, 1.02421390e+03, 3.27280523e+02], [0, 0, 1]] )
@@ -311,6 +311,7 @@ def run(export_path, choice = 1):
                 image.flags.writeable = True
                 image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
                 image_height, image_width, _ = image.shape
+                # image_height, image_width = 1920, 1080
                 
                 # Rendering results
                 if results.multi_hand_landmarks:
@@ -356,7 +357,7 @@ def run(export_path, choice = 1):
                             hand_world_landmarks.landmark[idx].y += 0.5
                         mp_drawing.draw_landmarks(plot,hand_world_landmarks, mp_hands.HAND_CONNECTIONS)
                 
-                # cv2.imshow('Plot', plot)
+                cv2.imshow('Plot', plot)
                 cv2.imshow('HandTracking', image) 
 
                 if(createControls):
@@ -384,5 +385,4 @@ def run(export_path, choice = 1):
     cv2.destroyAllWindows()
 
 
-run("./models/export.obj", 1)
-
+# run("./models/export.obj", 1)

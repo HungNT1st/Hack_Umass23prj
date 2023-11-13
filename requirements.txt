@@ -1,0 +1,14 @@
+opencv-python
+numpy
+mediapipe
+argparse
+uuid
+typing-extensions
+pygame
+PyOpenGL
+torch
+tk
+matplotlib
+bpy
+bmesh
+segment-anythingsam
