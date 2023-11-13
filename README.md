@@ -33,20 +33,24 @@ python main.py
 We were in a rush for the hackathon so this is still a project in progress, but here are the general overview of the process.
 
 1. First the system will take a picture of you:
+2. 
 ![image](./textures/bao.jpg)
 
-2. The system tracks your pose and measures the lengths of different parts of your body with MediaPipe:
+3. The system tracks your pose and measures the lengths of different parts of your body with MediaPipe:
+4. 
 ![image](./clothes.png)
 
-3. To make the UV mapping process easier, the system crops your image by removing the background:
+5. To make the UV mapping process easier, the system crops your image by removing the background:
 ![image](./clothes/k_front_body.jpg)
 ![image](./clothes/k_front_shirt.jpg)
 ![image](./clothes/k_front_jeans.jpg)
 
-4. After a while, your 3D model will be generated here. For now it is not that perfect \:)
+6. After a while, your 3D model will be generated here. For now, it is not that perfect \:)
+7. 
 ![image](./images/3dmodel.png)
 
-5. For an extra feature, which is also not working perfectly right now, you can choose to display it using AR on a hard surface or on your hand \:D
+8. For an extra feature, which is also not working perfectly right now, you can choose to display it using AR on a hard surface or on your hand \:D
+9. 
 ![image](./images/screenshot.png)
 
 That's it. Thank you for your time!
