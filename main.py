@@ -1,6 +1,6 @@
 from scan import *
 from pose import *
-from merge import *
+from merge import * 
 
 def main():
   name = model_SAM()   
